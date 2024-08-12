@@ -1,5 +1,8 @@
 package comm
 
+//V1.0.0
+//By cmluZw 2024-08-12
+
 import (
 	"encoding/json"
 	"fmt"
