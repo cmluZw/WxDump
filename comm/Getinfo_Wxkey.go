@@ -24,17 +24,17 @@ func patternScanModule(pid uint32, moduleName string, pattern []byte, returnMult
 	}
 	defer syscall.CloseHandle(hProcess)
 
-	moduleBaseAddress, moduleSize, err := getModuleInfo(pid, moduleName)
+	moduleBaseAddress, moduleSize, err := getModuleInfo(pid, moduleName) //返回WeChatWin.dll的基址
 	if err != nil {
 		return nil, err
 	}
 
-	moduleData, err := readProcessMemoryBytes(hProcess, moduleBaseAddress, int(moduleSize))
+	moduleData, err := readProcessMemoryBytes(hProcess, moduleBaseAddress, int(moduleSize)) //读取WeChatWin.dll里的内存
 	if err != nil {
 		return nil, err
 	}
 
-	positions := searchPattern(moduleData, pattern)
+	positions := searchPattern(moduleData, pattern) //在内存中搜索对应模块
 
 	if len(positions) == 0 {
 		return nil, nil
@@ -42,7 +42,7 @@ func patternScanModule(pid uint32, moduleName string, pattern []byte, returnMult
 
 	var results []uintptr
 	for _, pos := range positions {
-		results = append(results, moduleBaseAddress+uintptr(pos))
+		results = append(results, moduleBaseAddress+uintptr(pos)) //返回搜索到的模块的地址
 		if !returnMultiple {
 			break
 		}
@@ -190,13 +190,13 @@ func GetKey(dbPath string, addrLen int) (string, error) {
 	}
 	//defer windows.CloseHandle(hProcess)
 	Handle := syscall.Handle(hProcess)
-	for i := len(typeAddrs) - 1; i >= 0; i-- {
-		for j := typeAddrs[i]; j > typeAddrs[i]-2000; j -= uintptr(addrLen) {
-			keyBytes, err := readKeyBytes(Handle, j, addrLen)
+	for i := len(typeAddrs) - 1; i >= 0; i-- { //从后往前遍历
+		for j := typeAddrs[i]; j > typeAddrs[i]-2000; j -= uintptr(addrLen) { //从后往前开始，从高地址往低地址，从内存上来说是向下搜索，从搜索出来的基址开始遍历整个基址，遍历2kb，每次步长8kb
+			keyBytes, err := readKeyBytes(Handle, j, addrLen) //在搜索出来的基址下面2kb的地方找key
 			if err != nil || keyBytes == nil {
 				continue
 			}
-			if dbPath != "None" && verifyKey(keyBytes, microMsgPath) {
+			if dbPath != "None" && verifyKey(keyBytes, microMsgPath) { //验证key通过就是这个key，key和hmackey不一样，HMAC的密钥是刚提到的解密密钥和16字节盐值异或0x3a的值通过PKCS5_PBKF2_HMAC1密钥扩展算法迭代2次计算得到的
 				saveKeyToFile(keyBytes, "./key.txt")
 				return hex.EncodeToString(keyBytes), nil
 			}
