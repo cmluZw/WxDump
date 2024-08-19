@@ -10,7 +10,7 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-//go:embed version_list.json
+//go:embed WX_OFFS.json
 var versionListData []byte
 
 var PROCESS_ALL_ACCESS = uint32(
