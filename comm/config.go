@@ -4,11 +4,14 @@ package comm
 //By cmluZw 2024-08-12
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/sys/windows"
-	"io/ioutil"
 )
+
+//go:embed version_list.json
+var versionListData []byte
 
 var PROCESS_ALL_ACCESS = uint32(
 	windows.PROCESS_QUERY_INFORMATION |
@@ -32,24 +35,16 @@ type versionList struct {
 	Versions map[string][]int
 }
 
-//从version_list.json中读取版本和偏移量
+//微信名
+//0
+//手机号
 
 func Get_version_list() map[string][]int {
-	// 设置JSON文件路径
-	VERSION_LIST_PATH := "./comm/version_list.json"
-
-	// 读取JSON文件内容
-	fileContent, err := ioutil.ReadFile(VERSION_LIST_PATH)
-	if err != nil {
-		fmt.Printf("Error reading file '%s': %v\n", VERSION_LIST_PATH, err)
-		return nil
-	}
-
 	// 定义一个map变量用于存储解析后的JSON数据
 	var versionList map[string][]int
 
-	// 解析JSON数据到map
-	err = json.Unmarshal(fileContent, &versionList)
+	// 解析嵌入的JSON数据到map
+	err := json.Unmarshal(versionListData, &versionList)
 	if err != nil {
 		fmt.Printf("Error decoding JSON: %v\n", err)
 		return nil
@@ -58,3 +53,30 @@ func Get_version_list() map[string][]int {
 	// 打印versionList查看结果
 	//fmt.Printf("%+v\n", versionList["2.4.5.1"])
 }
+
+////从version_list.json中读取版本和偏移量
+//
+//func Get_version_list() map[string][]int {
+//	// 设置JSON文件路径
+//	VERSION_LIST_PATH := "./comm/version_list.json"
+//
+//	// 读取JSON文件内容
+//	fileContent, err := ioutil.ReadFile(VERSION_LIST_PATH)
+//	if err != nil {
+//		fmt.Printf("Error reading file '%s': %v\n", VERSION_LIST_PATH, err)
+//		return nil
+//	}
+//
+//	// 定义一个map变量用于存储解析后的JSON数据
+//	var versionList map[string][]int
+//
+//	// 解析JSON数据到map
+//	err = json.Unmarshal(fileContent, &versionList)
+//	if err != nil {
+//		fmt.Printf("Error decoding JSON: %v\n", err)
+//		return nil
+//	}
+//	return versionList
+//	// 打印versionList查看结果
+//	//fmt.Printf("%+v\n", versionList["2.4.5.1"])
+//}

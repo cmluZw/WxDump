@@ -146,6 +146,7 @@ func verifyKey(key []byte, wxDbPath string) bool {
 }
 
 func GetKey(dbPath string, addrLen int) (string, error) {
+	fmt.Println("正在通过内存读取的形式获取key....")
 	process, _ := GetWeChatProcess()
 	pid := uint32(process.ProcessID) // 示例进程ID，需要实际的进程ID
 	moduleName := "WeChatWin.dll"

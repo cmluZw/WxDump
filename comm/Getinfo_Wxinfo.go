@@ -144,18 +144,33 @@ func Get_info() (bool, string, string, string) {
 	module, _ := GetWeChatWinModule(process)
 	base_addr := module.ModBaseAddr
 	version, _ := GetVersion(module)
-	fmt.Println(version)
+	fmt.Println("当前微信版本: ", version)
 	wechatProcessHandle, _ := windows.OpenProcess(0x1F0FFF, false, process.ProcessID) //原来0x1F0FFF是PROCESS_ALL_ACCESS
-	//version = "3.9.2.26"
+	//version = "3.9.8.25"
 	if len(versionList[version]) == 0 {
-		fmt.Println("微信版本范围超过")
+		fmt.Println("微信版本范围超过已有配置")
+		return false, "", "", ""
 	}
-	nickName, _ := GetWeChatData(wechatProcessHandle, base_addr+uintptr(versionList[version][0]), 100)
-	account, _ := GetWeChatData(wechatProcessHandle, base_addr+uintptr(versionList[version][1]), 100)
-	key, _ := GetWeChatKey64(wechatProcessHandle, base_addr+uintptr(versionList[version][4]))
+
+	nickName, err := GetWeChatData(wechatProcessHandle, base_addr+uintptr(versionList[version][0]), 64)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false, "", "", ""
+	}
+	account, err := GetWeChatData(wechatProcessHandle, base_addr+uintptr(versionList[version][1]), 32)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false, "", "", ""
+	}
 	fmt.Println(nickName, account)
+	key, err := GetWeChatKey64(wechatProcessHandle, base_addr+uintptr(versionList[version][4]))
+	if err != nil {
+		fmt.Println("Error:", err)
+		return false, "", "", ""
+	}
 	if len(key) == 0 {
 		fmt.Println("找不到key")
+		return false, nickName, account, key
 	}
 	is_normal = true
 	return is_normal, nickName, account, key
